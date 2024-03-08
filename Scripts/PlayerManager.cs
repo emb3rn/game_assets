@@ -13,6 +13,7 @@ public class PlayerManager : MonoBehaviour
 
     public GameObject blueLevelOne;
     public GameObject blueLevelTwo;
+    public GameObject blueLevelThree;
     public GameObject redLevelOne;
     public GameObject redLevelTwo;
     public GameObject redLevelThree;
@@ -27,16 +28,17 @@ public class PlayerManager : MonoBehaviour
     private List<EnemyManager.Enemy> enemyList;
     private GameObject[,] gameObjects;
     private GameObject temporaryTarget; //use the gameobject the cursor is hovering on later
-    private GameObject lastHitObject; 
+    private GameObject lastHitObject;
     private List<Defence> defenceList = new List<Defence>();
 
     //i need some way to identify which tower is being placed, i could do it with numbers but this is more clear
 
     enum Types
     {
-        BLUE,
-        RED
+        Blue,
+        Red
     }
+
     enum DefenceLevels
     {
         BLUE_ONE,
@@ -44,16 +46,18 @@ public class PlayerManager : MonoBehaviour
         RED_ONE,
         RED_TWO,
         RED_THREE,
+        PLAYER_BASE
     }
 
     class Defence
     {
+        public GameObject gameObject;
+        public int health = 100;
         private int currentLevel = 0;
+
         private int damageAmount = 20;
         private List<EnemyManager.Enemy> enemyList;
-        public int health = 100;
         public float lastShotTime = Time.time;
-        public GameObject gameObject;
 
         public Defence(GameObject type, GameObject spawnObject, List<EnemyManager.Enemy> enemList)
         {
@@ -65,7 +69,7 @@ public class PlayerManager : MonoBehaviour
         }
         public void Upgrade()
         {
-        
+
         }
 
         //Function that returns nearest enemy, return type EnemyManager.Enemy, inputs enemyList 
@@ -90,8 +94,11 @@ public class PlayerManager : MonoBehaviour
         public void TrackEnemy()
         {
             EnemyManager.Enemy target = ReturnNearestEnemy();
+            GameObject gunBarrel = gameObject.transform.GetChild(1).gameObject;
+
             Vector3 pos = target.obj.transform.position;
             gameObject.transform.LookAt(new Vector3(pos.x, gameObject.transform.position.y, pos.z));
+            gunBarrel.transform.LookAt(pos);
         }
 
         public void ShootEnemy()
@@ -104,32 +111,32 @@ public class PlayerManager : MonoBehaviour
                 target.health -= damageAmount;
                 lastShotTime = Time.time;
                 Debug.Log("shot enemy");
-            } 
+            }
         }
     }
 
 
-    void SpawnDefence(GameObject targetObject, DefenceLevels defenceType, int amount) //should I just make this a part of the defence class?
+    void SpawnDefence(Types defenceType) //should I just make this a part of the defence class?
     {
-        lastHitObject = building.lastHitObject; //get the clicked on block
-        for (int i = 0; i < amount; i++)
+        //GameObject targetObject = building.lastHitObject; //get the clicked on block
+        GameObject targetObject = gameObjects[Random.Range(0,39), Random.Range(0,39)];
+        if (building.currentlyOnObject)
         {
-            GameObject chosenType = gameObject;
+            GameObject chosenType = //write up continue here, set to null;
 
-            switch (defenceType)
+            if (defenceType == Types.Blue)
             {
-                case DefenceLevels.BLUE_ONE:
-                    chosenType = blueLevelOne;
-                    break;
-                case DefenceLevels.BLUE_TWO:
-                    chosenType = blueLevelTwo;
-                    break;
+                chosenType = blueLevelOne;
+            }
+            if (defenceType == Types.Red)
+            {
+                chosenType = blueLevelTwo;
             }
 
             Defence newDefence = new Defence(chosenType, targetObject, enemyList);
             newDefence.gameObject = Instantiate(chosenType, newDefence.gameObject.transform.position, Quaternion.identity);
             newDefence.gameObject.transform.localScale = new Vector3(0.40f, 0.40f, 0.40f);
-            
+
             defenceList.Add(newDefence);
         }
     }
@@ -165,7 +172,11 @@ public class PlayerManager : MonoBehaviour
     private void Update()
     {
         MainDefenceLoop();
-        
+        if (Input.GetMouseButtonDown(0))
+        {
+            SpawnDefence(DefenceLevels.BLUE_ONE, 1);
+        }
 
     }
 }
+

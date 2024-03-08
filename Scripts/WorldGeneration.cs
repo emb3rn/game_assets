@@ -7,7 +7,7 @@ public class WorldGeneration : MonoBehaviour
 {
     public Color heightColor = new Color(1.0f, 1.0f, 0.0f, 1.0f);
     public Material cubeMaterial;
-    public float generateSeed = 0.1f;
+    public float seed = 0.1f;
     public Camera playerCamera;
     public int renderDistance = 3;
     public bool debugRender;
@@ -133,7 +133,7 @@ public class WorldGeneration : MonoBehaviour
             {
                 for (int j = 0; j < mapSize; j++)
                 {
-                    float noise = Mathf.PerlinNoise((i + generateSeed) * frequency, (j + generateSeed) * frequency) * amplitude;
+                    float noise = Mathf.PerlinNoise((i + seed) * frequency, (j + seed) * frequency) * amplitude;
                     gameObjects[i, j] = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     gameObjects[i, j].transform.position = new Vector3(i, Mathf.Round(noise * heightVariation) / heightVariation, j);
                     MeshRenderer meshRenderer = gameObjects[i, j].GetComponent<MeshRenderer>();
@@ -167,13 +167,13 @@ public class WorldGeneration : MonoBehaviour
     void regenerateNoise()
     {
         highestNoise = 0;
-        generateSeed = Random.Range(0.0f, 99999.0f);
+        seed = Random.Range(0.0f, 99999.0f);
         for (int i = 0; i < mapSize; i++)
         {
             for (int j = 0; j < mapSize; j++)
             {
                 Vector3 pos = gameObjects[i, j].transform.position;
-                float noise = Mathf.PerlinNoise((i + generateSeed) * frequency, (j + generateSeed) * frequency) * amplitude;
+                float noise = Mathf.PerlinNoise((i + seed) * frequency, (j + seed) * frequency) * amplitude;
                 gameObjects[i, j].transform.position = new Vector3(pos.x, Mathf.Round(noise * heightVariation) / heightVariation, pos.z);
                 gameObjects[i, j].GetComponent<Renderer>().material.SetColor("_Color", Color.white);
                 if (noise > highestNoise)
@@ -244,14 +244,14 @@ public class WorldGeneration : MonoBehaviour
         }
         if (scrollTerrain)
         {
-            generateSeed += 1.0f;
+            seed += 1.0f;
             highestNoise = 0;
             for (int i = 0; i < mapSize; i++)
             {
                 for (int j = 0; j < mapSize; j++)
                 {
                     Vector3 pos = gameObjects[i, j].transform.position;
-                    float noise = Mathf.PerlinNoise((i + generateSeed) * frequency, (j + generateSeed) * frequency) * amplitude;
+                    float noise = Mathf.PerlinNoise((i + seed) * frequency, (j + seed) * frequency) * amplitude;
                     gameObjects[i, j].transform.position = new Vector3(pos.x, Mathf.Round(noise * heightVariation) / heightVariation, pos.z);
                     gameObjects[i, j].GetComponent<Renderer>().material.SetColor("_Color", Color.white);
                     if (noise > highestNoise)
